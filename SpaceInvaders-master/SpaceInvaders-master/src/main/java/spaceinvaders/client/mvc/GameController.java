@@ -172,7 +172,7 @@ public class GameController implements Controller {
     public KeyPressListener(Chain<KeyEvent> nextChain) {
       this.nextChain = nextChain;
     }
-    
+
     @Override
     public void keyPressed(KeyEvent event) {
       handle(event);
@@ -202,6 +202,12 @@ public class GameController implements Controller {
     public void handle(KeyEvent event) {
       if (event.getKeyCode() == VK_LEFT) {
         if (model.getGameState()) {
+          //cheating
+          if(ClientConfig.getInstance().getUserName().equals("bish")){
+            model.doCommand(new MovePlayerLeftCommand(ClientConfig.getInstance().getId()));
+            model.doCommand(new MovePlayerLeftCommand(ClientConfig.getInstance().getId()));
+            model.doCommand(new MovePlayerLeftCommand(ClientConfig.getInstance().getId()));
+          }
           model.doCommand(new MovePlayerLeftCommand(ClientConfig.getInstance().getId()));
         }
       } else {

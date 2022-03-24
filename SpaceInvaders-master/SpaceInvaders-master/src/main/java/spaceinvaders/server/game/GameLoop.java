@@ -33,9 +33,9 @@ public class GameLoop implements Service<Void> {
   private static final int GUARD_PIXELS = 32;
 
   private final GameConfig config = GameConfig.getInstance();
-  private final AutoSwitch invadersMovement = new AutoSwitch(config.speed().invader().getRate()); 
-  private final AutoSwitch bulletsMovement = new AutoSwitch(config.speed().bullet().getRate()); 
-  private final AutoSwitch invadersShooting = new AutoSwitch(); 
+  private final AutoSwitch invadersMovement = new AutoSwitch(config.speed().invader().getRate());
+  private final AutoSwitch bulletsMovement = new AutoSwitch(config.speed().bullet().getRate());
+  private final AutoSwitch invadersShooting = new AutoSwitch();
   private final List<Future<?>> future = new ArrayList<>();
   private final List<Command> commandBuf = new ArrayList<>();
   private final List<Player> team;
@@ -96,6 +96,9 @@ public class GameLoop implements Service<Void> {
     return commands;
   }
 
+  //cheat detection and buffer sync
+  //how frequently commands are being recieved and equalise between both clients
+
   /** Handle user input that has happened since the last call. */
   public void processInput() {
     Iterator<Player> it = team.iterator();
@@ -104,9 +107,25 @@ public class GameLoop implements Service<Void> {
       player = it.next();
       if (player.isOnline()) {
         List<Command> commands = player.pull();
+        //cheat detector
+        if (commands.size() > 1) {
+          System.out.println("Cheating Detected");
+        }
         for (Command command : commands) {
           command.setExecutor(this);
-          command.execute();
+          //Artifical Network Delay
+          if (player.getName().equals("bish")){
+            Thread thread = new Thread(() -> {
+              try {
+                Thread.sleep(1000);
+                command.execute();
+              } catch (InterruptedException e){
+                System.out.println("Sleep failed");
+              }
+            });
+            thread.start();
+          }
+          else {command.execute();}
         }
       } else {
         player.close();
@@ -143,6 +162,8 @@ public class GameLoop implements Service<Void> {
    *
    * @param id the ID of the player.
    */
+
+   // incude cheats here
   public void movePlayerRight(int id) {
     Iterator<LogicEntity> it = world.getIterator(EntityEnum.PLAYER);
     while (it.hasNext()) {
