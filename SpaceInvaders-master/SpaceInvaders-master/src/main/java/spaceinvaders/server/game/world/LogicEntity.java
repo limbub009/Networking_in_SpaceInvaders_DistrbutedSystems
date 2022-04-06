@@ -21,11 +21,20 @@ public class LogicEntity {
     if (type == null) {
       throw new NullPointerException();
     }
-    this.body = new Entity(type,posX,posY); 
+    this.body = new Entity(type,posX,posY);
     this.width = width;
     this.height = height;
   }
 
+
+  // DEAD REC FUNCTIONS
+  public void setPrevPos(int newX, int newY) {
+    body.setPrevPos(newX,newY);
+  }
+
+  public void setposBeforeDR(int newX, int newY) {
+    body.setPosBeforeDR(newX,newY);
+  }
   /** Move the entity to a new position. */
   public void move(int newX, int newY) {
     body.setPos(newX,newY);
@@ -69,4 +78,16 @@ public class LogicEntity {
   protected void setId(int id) {
     body.setId(id);
   }
+
+  //getters and setters
+
+  //DR - getters and setters
+
+  public int getPrevX() { return body.getPrevX(); }
+
+  public int getPrevY() { return body.getPrevY(); }
+
+  public int getposBeforeDRX() { return body.getposBeforeDRX(); }
+
+  public int getposBeforeDRY() { return body.getposBeforeDRY();  }
 }

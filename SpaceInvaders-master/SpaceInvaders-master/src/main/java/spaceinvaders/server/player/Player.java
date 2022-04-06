@@ -15,6 +15,7 @@ public class Player {
   private final Future<Void> connectionFuture;
   private String name;
   private Integer teamSize;
+  private Command previousCommand;
 
   /**
    * Wrap a player around the specified connection.
@@ -105,5 +106,16 @@ public class Player {
    */
   public void setUdpDestinationPort(int port) {
     connection.setUdpChain(port);
+  }
+
+
+  //dead recokoning
+
+  public Command getPreviousCommand(){
+    return previousCommand;
+  }
+
+  public void setPreviousCommand(Command previousCommand){
+    this.previousCommand = previousCommand;
   }
 }

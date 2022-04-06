@@ -87,78 +87,86 @@ class Game implements Service<Void> {
    * @throws ExecutionException if an exception occurs during execution.
    * @throws InterruptedException if the service is interrupted prior to shutdown.
    */
-  @Override
-  public Void call() throws ExecutionException, InterruptedException {
-    StringBuffer buf = new StringBuffer();
-    for (Player player : team) {
-      buf.append(player.getName() + "@" + player.getId() + " ");
-    }
-    LOGGER.info("Started game " + hashCode() + " with players: " + buf.toString());
+   @Override
+   public Void call() throws ExecutionException, InterruptedException {
+       StringBuffer buf = new StringBuffer();
+       for (Player player : team) {
+           buf.append(player.getName() + "@" + player.getId() + " ");
+       }
+       LOGGER.info("Started game " + hashCode() + " with players: " + buf.toString());
 
-    distributeCommand(new RefreshEntitiesCommand(world.getEntities()));
-    flushCommands();
-    List<Couple<Integer,String>> idToName = new ArrayList<>(team.size());
-    for (Player player : team) {
-      idToName.add(new Couple<Integer,String>(player.getId(),player.getName()));
-    }
-    distributeCommand(new SetPlayerNamesCommand(idToName));
-    distributeCommand(new StartGameCommand());
-    distributeCommand(new FlushScreenCommand());
-    flushCommands();
+       distributeCommand(new RefreshEntitiesCommand(world.getEntities()));
+       flushCommands();
+       List<Couple<Integer,String>> idToName = new ArrayList<>(team.size());
+       for (Player player : team) {
+           idToName.add(new Couple<Integer,String>(player.getId(),player.getName()));
+       }
+       distributeCommand(new SetPlayerNamesCommand(idToName));
+       distributeCommand(new StartGameCommand());
+       distributeCommand(new FlushScreenCommand());
+       flushCommands();
 
-    gameLoop.call();
-    try {
-      int frameCounter = 0;
-      while (state.get()) {
-        boolean commandsAvailable = false;
-        gameLoop.processInput();
-        gameLoop.update();
-        Command[] commands = gameLoop.drainCommands();
-        if (0 != commands.length) {
-          commandsAvailable = true;
-        }
-        for (Command command : commands) {
-          distributeCommand(command);
-        }
-        if (world.count(PLAYER) == 0) {
-          distributeCommand(new PlayersLostCommand());
-          state.set(false);
-          flushCommands();
-          break;
-        } else if (world.count(INVADER) == 0) {
-          distributeCommand(new PlayersWonCommand());
-          state.set(false);
-          flushCommands();
-          break;
-        }
-        /* Do a complete refresh every 8 seconds. */
-        frameCounter = (frameCounter + 1) % (FRAMES_PER_SECOND * 8);
-        if (frameCounter == FRAMES_PER_SECOND * 8) {
-          distributeCommand(new RefreshEntitiesCommand(world.getEntities()));
-          commandsAvailable = true;
-          frameCounter = 0;
-        } else {
-          ++frameCounter;
-        }
-        if (commandsAvailable) {
-          distributeCommand(new FlushScreenCommand());
-          flushCommands();
-        }
-        Thread.sleep(1000 / FRAMES_PER_SECOND);
-      }
-    } catch (InterruptedException intException) {
-      if (state.get()) {
-        throw new InterruptedException();
-      }
-    } finally {
-      distributeCommand(new QuitGameCommand());
-      shutdown();
-    }
+       gameLoop.call();
+       try {
+           int bucketSyncCount = 0;
+           while (state.get()) {
+               boolean commandsAvailable = false;
+               gameLoop.processInput();
+               gameLoop.update();
+               Command[] commands = gameLoop.drainCommands();
+               if (0 != commands.length) {
+                   commandsAvailable = true;
+               }
+               for (Command command : commands) {
+                   distributeCommand(command);
+               }
+               if (world.count(PLAYER) == 0) {
+                   distributeCommand(new PlayersLostCommand());
+                   state.set(false);
+                   flushCommands();
+                   break;
+               } else if (world.count(INVADER) == 0) {
+                   distributeCommand(new PlayersWonCommand());
+                   state.set(false);
+                   flushCommands();
+                   break;
+               }
 
-    LOGGER.info("Game " + hashCode() + " terminated");
+               distributeCommand(new FlushScreenCommand());
 
-    return null; 
-  }
+               //Bucket Sync.
+
+               int largestLatency = 5000; //largest latency of all the players
+               int desiredMS = 1000 / FRAMES_PER_SECOND; //ideally what the latency should be
+
+               if(largestLatency > desiredMS) // a player has high lag, must use their lag to make fair.
+                   desiredMS = largestLatency;
+
+               int ticksRequried = desiredMS / (1000 / FRAMES_PER_SECOND); // e.g. 75/25=3, run while loop 3 times to reach largest latency
+
+               if (bucketSyncCount == ticksRequried) {
+                   flushCommands(); // sends updates to client
+                   bucketSyncCount = 0;
+               } else {
+                   bucketSyncCount++;
+               }
+               //
+
+               Thread.sleep(1000 / FRAMES_PER_SECOND);
+           }
+       } catch (InterruptedException intException) {
+           if (state.get()) {
+               throw new InterruptedException();
+           }
+       } finally {
+           distributeCommand(new QuitGameCommand());
+           shutdown();
+       }
+
+       LOGGER.info("Game " + hashCode() + " terminated");
+
+       return null;
+   }
 
   /** Close the connections of all players in the team and stop all running subtasks.*/
   @Override
