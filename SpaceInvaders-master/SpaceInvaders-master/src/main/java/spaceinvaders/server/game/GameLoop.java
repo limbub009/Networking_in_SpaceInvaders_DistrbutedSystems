@@ -145,7 +145,7 @@ public class GameLoop implements Service<Void> {
             Player finalPlayer = player;
             Thread thread = new Thread(() -> {
               try {
-                Thread.sleep(6000);
+                Thread.sleep(5000);
                 if(deadrec == true){
                   LogicEntity thisPlayer = getPlayerAsLogicEntity(finalPlayer.getId());
                   //smoothMove(thisPlayer,thisPlayer.getposBeforeDRX(),thisPlayer.getposBeforeDRY());
