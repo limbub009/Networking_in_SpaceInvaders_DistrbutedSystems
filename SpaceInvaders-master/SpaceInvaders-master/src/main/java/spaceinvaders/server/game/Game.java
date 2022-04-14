@@ -135,7 +135,7 @@ class Game implements Service<Void> {
                distributeCommand(new FlushScreenCommand());
 
                // BUCKET SYNC
-               int MAXLatency = 1000;
+               int MAXLatency = 0;
                int DelayMS = 1000 / FRAMES_PER_SECOND;
 
 

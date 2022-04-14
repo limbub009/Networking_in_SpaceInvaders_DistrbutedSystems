@@ -111,7 +111,7 @@ public class GameLoop implements Service<Void> {
           LogicEntity thisPlayer = playerAsLE(player.getId());
           Command lastCommand = player.getLastCommand();
           if (lastCommand instanceof spaceinvaders.command.server.MovePlayerLeftCommand || lastCommand instanceof spaceinvaders.command.server.MovePlayerRightCommand){
-
+            System.out.println("inside if");
             if (thisPlayer.lastX() == thisPlayer.getX()){
               deadReck = true;
               if (deadReck == true){
@@ -145,10 +145,10 @@ public class GameLoop implements Service<Void> {
             Player finalPlayer = player;
             Thread thread = new Thread(() -> {
               try {
-                //Thread.sleep(5000);
+                Thread.sleep(3000);
                 if(deadReck == true){
                   LogicEntity thisPlayer = playerAsLE(finalPlayer.getId());
-                  smoothMove(thisPlayer,thisPlayer.posb4DRX(),thisPlayer.posb4DRY());
+                  //smoothMove(thisPlayer,thisPlayer.posb4DRX(),thisPlayer.posb4DRY());
                 }
                 command.execute();
                 finalPlayer.setLastCommand(command);
@@ -182,6 +182,7 @@ public class GameLoop implements Service<Void> {
     while (it.hasNext()){
       LogicEntity player = it.next();
       if (player.getId() == id){
+        System.out.println("returned player");
         return player;
       }
     }
