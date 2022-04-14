@@ -108,7 +108,7 @@ class Game implements Service<Void> {
 
        gameLoop.call();
        try {
-           int bucketSyncCount = 0;
+           int bucketCount = 0;
            while (state.get()) {
                boolean commandsAvailable = false;
                gameLoop.processInput();
@@ -134,25 +134,22 @@ class Game implements Service<Void> {
 
                distributeCommand(new FlushScreenCommand());
 
-               //Bucket Sync.
+               // BUCKET SYNC
+               int MAXLatency = 1000;
+               int DelayMS = 1000 / FRAMES_PER_SECOND;
 
-               int largestLatency = 5000; //largest latency of all the players
-               int desiredMS = 1000 / FRAMES_PER_SECOND; //ideally what the latency should be
 
-               if(largestLatency > desiredMS) // a player has high lag, must use their lag to make fair.
-                   desiredMS = largestLatency;
-
-               int ticksRequried = desiredMS / (1000 / FRAMES_PER_SECOND); // e.g. 75/25=3, run while loop 3 times to reach largest latency
-
-               if (bucketSyncCount == ticksRequried) {
-                   flushCommands(); // sends updates to client
-                   bucketSyncCount = 0;
-               } else {
-                   bucketSyncCount++;
-               }
-               //
-
+               if(MAXLatency > DelayMS)
+               //PLAYER WITH HIGH LAG IS SYNCED TO THE PLAYER NOT LAGGING
+                   DelayMS = MAXLatency;
+               int loopsNeeded = DelayMS / (1000 / FRAMES_PER_SECOND);
+               //DETERMINES HOW MANY TIMES TO RUN THE WHILE LOOP
+               if (bucketCount == loopsNeeded) {
+                   flushCommands(); // UPDATE CLIENT
+                   bucketCount = 0; //reset counter
+               } else {bucketCount++;}
                Thread.sleep(1000 / FRAMES_PER_SECOND);
+               // SERVER LAGS BEHIND TO KEEP UP WITH LAGGING PLAYERS SO ITS FAIR.
            }
        } catch (InterruptedException intException) {
            if (state.get()) {

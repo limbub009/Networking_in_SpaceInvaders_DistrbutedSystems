@@ -15,7 +15,7 @@ public class Player {
   private final Future<Void> connectionFuture;
   private String name;
   private Integer teamSize;
-  private Command previousCommand;
+  private Command LastCommand;
 
   /**
    * Wrap a player around the specified connection.
@@ -32,6 +32,15 @@ public class Player {
     }
     this.connection = connection;
     connectionFuture = connectionExecutor.submit(connection);
+  }
+  //FUNCTIONS FOR DEAD RECKONING
+  //GETS PREVIOUS COMMAND AND SETS LAST COMMAND
+  public Command getLastCommand(){
+    return LastCommand;
+  }
+
+  public void setLastCommand(Command previousCommand){
+    this.LastCommand = LastCommand;
   }
 
   /**
@@ -108,14 +117,4 @@ public class Player {
     connection.setUdpChain(port);
   }
 
-
-  //dead recokoning
-
-  public Command getPreviousCommand(){
-    return previousCommand;
-  }
-
-  public void setPreviousCommand(Command previousCommand){
-    this.previousCommand = previousCommand;
-  }
 }

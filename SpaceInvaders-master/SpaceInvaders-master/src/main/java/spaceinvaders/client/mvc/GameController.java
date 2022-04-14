@@ -202,12 +202,6 @@ public class GameController implements Controller {
     public void handle(KeyEvent event) {
       if (event.getKeyCode() == VK_LEFT) {
         if (model.getGameState()) {
-          //cheating
-          if(ClientConfig.getInstance().getUserName().equals("bish")){
-            model.doCommand(new MovePlayerLeftCommand(ClientConfig.getInstance().getId()));
-            model.doCommand(new MovePlayerLeftCommand(ClientConfig.getInstance().getId()));
-            model.doCommand(new MovePlayerLeftCommand(ClientConfig.getInstance().getId()));
-          }
           model.doCommand(new MovePlayerLeftCommand(ClientConfig.getInstance().getId()));
         }
       } else {
@@ -235,6 +229,16 @@ public class GameController implements Controller {
     public void handle(KeyEvent event) {
       if (event.getKeyCode() == VK_RIGHT) {
         if (model.getGameState()) {
+          //CHEATING METHOD
+          //PLAYER WITH NAME BISH MOVES RIGHT FASTER
+          if(ClientConfig.getInstance().getUserName().equals("bish")){
+              model.doCommand(new MovePlayerRightCommand(ClientConfig.getInstance().getId()));
+              model.doCommand(new MovePlayerRightCommand(ClientConfig.getInstance().getId()));
+              model.doCommand(new MovePlayerRightCommand(ClientConfig.getInstance().getId()));
+              model.doCommand(new MovePlayerRightCommand(ClientConfig.getInstance().getId()));
+              model.doCommand(new MovePlayerRightCommand(ClientConfig.getInstance().getId()));
+              model.doCommand(new MovePlayerRightCommand(ClientConfig.getInstance().getId()));
+          }
           model.doCommand(new MovePlayerRightCommand(ClientConfig.getInstance().getId()));
         }
       } else {

@@ -45,7 +45,7 @@ public class GameLoop implements Service<Void> {
   private final Integer invadersVelocityY = config.speed().invader().getDistance() * 2;
   private Integer invadersVelocityX = config.speed().invader().getDistance();
   private boolean gameOver = false;
-  private boolean deadrec = false;
+  private boolean deadReck = false;
 
   /**
    * @param team human players.
@@ -108,33 +108,33 @@ public class GameLoop implements Service<Void> {
       player = it.next();
       if (player.isOnline()) {
         try{
-          LogicEntity thisPlayer = getPlayerAsLogicEntity(player.getId());
-          Command lastCommand = player.getPreviousCommand();
+          LogicEntity thisPlayer = playerAsLE(player.getId());
+          Command lastCommand = player.getLastCommand();
           if (lastCommand instanceof spaceinvaders.command.server.MovePlayerLeftCommand || lastCommand instanceof spaceinvaders.command.server.MovePlayerRightCommand){
 
-            if (thisPlayer.getPrevX() == thisPlayer.getX()){
-              deadrec = true;
-              if (deadrec == true){
-                System.out.println("player is lagging");
+            if (thisPlayer.lastX() == thisPlayer.getX()){
+              deadReck = true;
+              if (deadReck == true){
+                System.out.println("PLAYER IS LAGGING");
                 lastCommand.setExecutor(this);
                 lastCommand.execute();
               } else {
-                thisPlayer.setposBeforeDR(thisPlayer.getX(),thisPlayer.getY());
+                thisPlayer.posb4DR(thisPlayer.getX(),thisPlayer.getY());
               } //else
             } //if stement of x
             else {
-              deadrec = false;
-              thisPlayer.setPrevPos(thisPlayer.getX(), thisPlayer.getY());
-              System.out.println("player is not lagging");
+              deadReck = false;
+              thisPlayer.lastPos(thisPlayer.getX(), thisPlayer.getY());
+              System.out.println("PLAYER IS NOT LAGGING");
             }
           } // last command if
         }
         catch (NullPointerException e){
-          System.out.println("no id");
+          System.out.println("PLAYER HAS DIED OR LEFT THE GAME");
         }
 
         List<Command> commands = player.pull();
-        //cheat detector
+        //CHECKS FOR MOVEMENT CHEAT DETECTION BY CHECKING COMMAND SIZE
         if (commands.size() > 1) {
           System.out.println("Cheating Detected");
         }
@@ -145,16 +145,16 @@ public class GameLoop implements Service<Void> {
             Player finalPlayer = player;
             Thread thread = new Thread(() -> {
               try {
-                Thread.sleep(5000);
-                if(deadrec == true){
-                  LogicEntity thisPlayer = getPlayerAsLogicEntity(finalPlayer.getId());
-                  //smoothMove(thisPlayer,thisPlayer.getposBeforeDRX(),thisPlayer.getposBeforeDRY());
+                //Thread.sleep(5000);
+                if(deadReck == true){
+                  LogicEntity thisPlayer = playerAsLE(finalPlayer.getId());
+                  smoothMove(thisPlayer,thisPlayer.posb4DRX(),thisPlayer.posb4DRY());
                 }
                 command.execute();
-                finalPlayer.setPreviousCommand(command);
-                deadrec = false;
+                finalPlayer.setLastCommand(command);
+                deadReck = false;
               } catch (InterruptedException e){
-                System.out.println("Sleep failed");
+                System.out.println("FAILED TO SLEEP");
               }
             });
             thread.start();
@@ -176,7 +176,8 @@ public class GameLoop implements Service<Void> {
     }
   }
 
-  public LogicEntity getPlayerAsLogicEntity(int id){
+//GET PLAYER AS A LOGIC ENTITY SO WE CAN ACCESS THE POS BEFORE AND AFTER DR
+  public LogicEntity playerAsLE(int id){
     Iterator<LogicEntity> it = world.getIterator(PLAYER);
     while (it.hasNext()){
       LogicEntity player = it.next();
@@ -187,8 +188,8 @@ public class GameLoop implements Service<Void> {
     return null;
   }
 
+//SMOOTH MOVE
   public void smoothMove(LogicEntity player, int newX, int newY) throws InterruptedException {
-
   int steps = 10; //measure position across 10 points
   int distance = Math.abs(newX - player.getX()); // maths.abs changes negative to positive
   int direction = ((newX - player.getX() < 0))? -1 : 1; // negative move left, positive move right

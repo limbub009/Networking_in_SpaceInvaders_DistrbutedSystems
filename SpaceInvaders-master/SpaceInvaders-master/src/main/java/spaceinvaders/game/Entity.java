@@ -8,19 +8,11 @@ public class Entity implements Cloneable {
   private Integer id;
   // Upper-left corner coordinates.
   private Couple<Integer,Integer> pos;
-  private Couple<Integer,Integer> previousPos;
+  private Couple<Integer,Integer> lastPos;
+  private Couple<Integer,Integer> posb4DR;
 
-  private Couple<Integer,Integer> posBeforeDR;
 
-  private boolean hasStoppedSucessfully = false;
 
-  public boolean isHasStoppedSucessfully() {
-    return hasStoppedSucessfully;
-  }
-
-  public void setHasStoppedSucessfully(boolean hasStoppedSucessfully) {
-    this.hasStoppedSucessfully = hasStoppedSucessfully;
-  }
 
   /**
    * @param type the type of the entity.
@@ -38,9 +30,9 @@ public class Entity implements Cloneable {
     this.id = id;
     this.pos = new Couple<>(posX,posY);
 
-    //dead rec
-    this.previousPos = new Couple<>(posX,posY);
-    this.posBeforeDR = new Couple<>(posX,posY);
+    //DEAD RECKONING ADDITIONS
+    this.lastPos = new Couple<>(posX,posY);
+    this.posb4DR = new Couple<>(posX,posY);
   }
 
   /**
@@ -57,9 +49,8 @@ public class Entity implements Cloneable {
     this.type = type;
     id = hashCode();
     this.pos = new Couple<>(posX,posY);
-    //DR
-    this.previousPos = new Couple<>(posX,posY);
-    this.posBeforeDR = new Couple<>(posX,posY);
+    this.lastPos = new Couple<>(posX,posY);
+    this.posb4DR = new Couple<>(posX,posY);
   }
 
   @Override
@@ -87,20 +78,20 @@ public class Entity implements Cloneable {
     return pos.getSecond();
   }
 
-  public int getposBeforeDRX() {
-    return posBeforeDR.getFirst();
+  public int posb4DRX() {
+    return posb4DR.getFirst();
   }
 
-  public int getposBeforeDRY() {
-    return posBeforeDR.getSecond();
+  public int posb4DRY() {
+    return posb4DR.getSecond();
   }
 
-  public int getPrevX() {
-    return previousPos.getFirst();
+  public int lastX() {
+    return lastPos.getFirst();
   }
 
-  public int getPrevY() {
-    return previousPos.getSecond();
+  public int lastY() {
+    return lastPos.getSecond();
   }
 
   public void setPos(int posX, int posY) {
@@ -108,13 +99,21 @@ public class Entity implements Cloneable {
     pos.setSecond(posY);
   }
 
-  public void setPrevPos(int posX, int posY) {
-  previousPos.setFirst(posX);
-  previousPos.setSecond(posY);
+  public void lastPos(int posX, int posY) {
+  lastPos.setFirst(posX);
+  lastPos.setSecond(posY);
 }
 
-  public void setPosBeforeDR(int posX, int posY) {
-    posBeforeDR.setFirst(posX);
-    posBeforeDR.setSecond(posY);
+  public void posb4DR(int posX, int posY) {
+    posb4DR.setFirst(posX);
+    posb4DR.setSecond(posY);
 }
+//  GETTERS AND SETTERS FOR STOPS
+  private boolean Stopped = false;
+  public boolean getStopped() {
+    return Stopped;
+  }
+  public void setStopped(boolean Stopped) {
+    this.Stopped = Stopped;
+  }
 }

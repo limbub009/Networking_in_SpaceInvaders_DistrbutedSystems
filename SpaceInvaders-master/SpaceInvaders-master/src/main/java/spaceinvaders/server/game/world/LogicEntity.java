@@ -28,13 +28,27 @@ public class LogicEntity {
 
 
   // DEAD REC FUNCTIONS
-  public void setPrevPos(int newX, int newY) {
-    body.setPrevPos(newX,newY);
+  //SET LAST POSITION AND BEFORE DEAD RECKONING
+  public void lastPos(int newX, int newY) {
+    body.lastPos(newX,newY);
   }
 
-  public void setposBeforeDR(int newX, int newY) {
-    body.setPosBeforeDR(newX,newY);
+  public void posb4DR(int newX, int newY) {
+    body.posb4DR(newX,newY);
   }
+
+  //GETTERS AND SETTERS
+  //GETS X AND Y POSITIONS B4 AND AFTER DEAD RECKONING
+
+  public int lastX() { return body.lastX(); }
+
+  public int lastY() { return body.lastY(); }
+
+  public int posb4DRX() { return body.posb4DRX(); }
+
+  public int posb4DRY() { return body.posb4DRY();  }
+
+
   /** Move the entity to a new position. */
   public void move(int newX, int newY) {
     body.setPos(newX,newY);
@@ -79,15 +93,4 @@ public class LogicEntity {
     body.setId(id);
   }
 
-  //getters and setters
-
-  //DR - getters and setters
-
-  public int getPrevX() { return body.getPrevX(); }
-
-  public int getPrevY() { return body.getPrevY(); }
-
-  public int getposBeforeDRX() { return body.getposBeforeDRX(); }
-
-  public int getposBeforeDRY() { return body.getposBeforeDRY();  }
 }
